@@ -1,5 +1,6 @@
 package com.example.stopwatch;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
@@ -11,39 +12,60 @@ import android.widget.Chronometer;
 
 import com.example.stopwatch.R;
 
+
 public class MainActivity extends AppCompatActivity {
 
     public static final String TAG = MainActivity.class.getSimpleName();
-
+    public static final String KEY_CHRONOMETER_BASE = "chronometer base";
+    public static final String KEY_CHRONOMETER_BASE2 = "chronometer base2";
+    public static final String KEY_CHRONOMETER_ON = "is chronometer on";
+    public static final String KEY_CHRONOMETER_STOPTIME = "chronometer stopped time";
     private Button start;
     private Button stop;
     private Button reset;
     private Chronometer timer;
     private long base = 0;
+    private int isRunning;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Log.d(TAG, "onCreate: ");
         wireWidgets();
         setListeners();
-        Log.d(TAG, "onCreate: ");
+        if (savedInstanceState != null)
+        {
+                isRunning = savedInstanceState.getInt(KEY_CHRONOMETER_ON);
+            if (isRunning == 1) {
+                    timer.setBase(savedInstanceState.getLong(KEY_CHRONOMETER_BASE));
+                timer.start();
+            }
+            else {
+                    timer.setBase(savedInstanceState.getLong(KEY_CHRONOMETER_STOPTIME));
+            }
+        }
     }
 
     private void setListeners() {
             start.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                        timer.setBase(SystemClock.elapsedRealtime() + base);
+                        isRunning = 1;
+                    timer.setBase(SystemClock.elapsedRealtime() + base);
                     timer.start();
+                    start.setEnabled(false);
+                    stop.setEnabled(true);
                 }
             });
 
         stop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                    base = timer.getBase() - SystemClock.elapsedRealtime();
+                    isRunning = 0;
+                base = timer.getBase() - SystemClock.elapsedRealtime();
                 timer.stop();
+                start.setEnabled(true);
             }
         });
 
@@ -52,6 +74,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                     timer.setBase(SystemClock.elapsedRealtime());
                 base = 0;
+                start.setEnabled(true);
             }
         });
     }
@@ -96,5 +119,14 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
             super.onDestroy();
         Log.d(TAG, "onDestroy: ");
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+            super.onSaveInstanceState(outState);
+        outState.putLong(KEY_CHRONOMETER_BASE, timer.getBase());
+        if (base != 0)
+            outState.putLong(KEY_CHRONOMETER_STOPTIME, SystemClock.elapsedRealtime() + base);
+        outState.putInt(KEY_CHRONOMETER_ON, isRunning);
     }
 }
