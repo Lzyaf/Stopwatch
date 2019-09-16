@@ -17,7 +17,6 @@ public class MainActivity extends AppCompatActivity {
 
     public static final String TAG = MainActivity.class.getSimpleName();
     public static final String KEY_CHRONOMETER_BASE = "chronometer base";
-    public static final String KEY_CHRONOMETER_BASE2 = "chronometer base2";
     public static final String KEY_CHRONOMETER_ON = "is chronometer on";
     public static final String KEY_CHRONOMETER_STOPTIME = "chronometer stopped time";
     private Button start;
@@ -42,7 +41,8 @@ public class MainActivity extends AppCompatActivity {
                 timer.start();
             }
             else {
-                    timer.setBase(savedInstanceState.getLong(KEY_CHRONOMETER_STOPTIME));
+                    base = savedInstanceState.getLong(KEY_CHRONOMETER_STOPTIME);
+                timer.setBase(savedInstanceState.getLong(KEY_CHRONOMETER_STOPTIME) + SystemClock.elapsedRealtime());
             }
         }
     }
@@ -125,8 +125,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onSaveInstanceState(@NonNull Bundle outState) {
             super.onSaveInstanceState(outState);
         outState.putLong(KEY_CHRONOMETER_BASE, timer.getBase());
-        if (base != 0)
-            outState.putLong(KEY_CHRONOMETER_STOPTIME, SystemClock.elapsedRealtime() + base);
+        outState.putLong(KEY_CHRONOMETER_STOPTIME, base);
         outState.putInt(KEY_CHRONOMETER_ON, isRunning);
     }
 }
